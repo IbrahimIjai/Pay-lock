@@ -1,13 +1,15 @@
-import React from 'react'
+import { PageConnectChecker } from "@/ui/checkers/page-connect";
+import Dashboard from "@/ui/dashboard/dashboard";
+import React from "react";
 
-function Dashboard() {
-  return (
-    <div>
-      
-    </div>
-  )
+function DashboardPage() {
+	return (
+		<div>
+			<PageConnectChecker>
+				<Dashboard />
+			</PageConnectChecker>
+		</div>
+	);
 }
 
-export default Dashboard
-
-
+export default DashboardPage;

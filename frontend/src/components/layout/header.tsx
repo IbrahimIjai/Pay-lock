@@ -28,14 +28,9 @@ const navigation: NavigationItem[] = [
 		description: "View your dashboard",
 	},
 	{
-		name: "Transactions",
-		href: "/transactions",
+		name: "Browse Services",
+		href: "/services",
 		description: "View your transactions",
-	},
-	{
-		name: "Settings",
-		href: "/settings",
-		description: "Manage your account settings",
 	},
 ];
 
@@ -86,17 +81,17 @@ export default function Header() {
 	const pathname = usePathname();
 
 	return (
-		<header className="px-6 py-2 sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+		<header className="px-6 py-2 sticky top-0 z-20 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
 			<div className="container flex h-16 items-center">
 				<div className="mr-12">
 					<Link href="/" className="flex items-center space-x-2">
-						<Lock className="h-6 w-6 text-primary" />
+						<Lock className="h-6 w-6 text-primary mr-4" />
 						<span className="font-bold text-xl">PayLock</span>
 					</Link>
 				</div>
 
 				{/* Desktop Navigation */}
-				<nav className="hidden md:flex items-center space-x-6 text-sm font-medium flex-1">
+				<nav className="ml-4 hidden md:flex items-center space-x-6 text-sm font-medium flex-1">
 					{navigation.map((item) => (
 						<Link
 							key={item.href}
