@@ -259,7 +259,7 @@ contract PayLockProtocol is Ownable, ReentrancyGuard {
 		require(msg.sender == rateUpdater, "Not authorized");
 		require(newRate > 0, "Invalid rate");
 		currentPYUSDRate = newRate;
-		emit PYUSDRateUpdated(newRate, block.time);
+		emit PYUSDRateUpdated(newRate, block.timestamp);
 	}
 
 	// View Functions

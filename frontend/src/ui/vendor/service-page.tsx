@@ -22,47 +22,20 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
 	Table,
 	TableBody,
-	TableCell,
+	// TableCell,
 	TableHead,
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Users, DollarSign, Clock, AlertTriangle } from "lucide-react";
-import { useAccount } from "wagmi";
-import { formatDistanceToNow } from "date-fns";
+import { useAccount, useReadContract } from "wagmi";
+// import { formatDistanceToNow } from "date-fns";
 import { ButtonConnectChecker } from "../checkers/btn-connect";
-
-// Mock data - replace with actual data fetching
-const mockService = {
-	id: 1,
-	name: "Advanced Web Development Course",
-	description:
-		"Complete web development course covering frontend and backend technologies",
-	price: 299,
-	vendor: "0x1234...5678",
-	isEscrow: true,
-	totalPurchases: 45,
-	rating: 4.8,
-	estimatedDelivery: "2-3 weeks",
-};
-
-const mockTransactions = [
-	{
-		id: 1,
-		buyer: "0xabcd...efgh",
-		amount: 299,
-		status: "Completed",
-		timestamp: new Date(Date.now() - 86400000),
-	},
-	{
-		id: 2,
-		buyer: "0xijkl...mnop",
-		amount: 299,
-		status: "Processing",
-		timestamp: new Date(Date.now() - 172800000),
-	},
-];
+import { PayLockProtocol } from "@/config";
+import { PAYLOCK_ABI } from "@/config/abi";
+import { Address, formatEther, parseEther } from "viem";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ServiceIDMain() {
 	const params = useParams();
@@ -72,6 +45,33 @@ export default function ServiceIDMain() {
 	const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 	const [isProcessing, setIsProcessing] = useState(false);
 
+	const { data: serviceData, isLoading: isServiceLoading } = useReadContract({
+		address: PayLockProtocol,
+		abi: PAYLOCK_ABI,
+		functionName: "services",
+		args: [BigInt(params.service as string)],
+	});
+
+	const { data: pyusdRate, isLoading: isRateLoading } = useReadContract({
+		address: PayLockProtocol,
+		abi: PAYLOCK_ABI,
+		functionName: "currentPYUSDRate",
+	});
+
+	const service = serviceData
+		? {
+				id: params.serviceId,
+				name: serviceData[1] as string,
+				description: serviceData[2] as string,
+				priceUSD: serviceData[3] as bigint,
+				isEscrow: serviceData[4] as boolean,
+				isActive: serviceData[5] as boolean,
+				vendor: serviceData[0] as Address,
+		  }
+		: null;
+
+	console.log({ service });
+	
 	const handlePayment = async () => {
 		setIsProcessing(true);
 		// Implement payment logic here
@@ -80,6 +80,22 @@ export default function ServiceIDMain() {
 			setShowPaymentDialog(false);
 		}, 2000);
 	};
+
+	if (isServiceLoading || isRateLoading) {
+		return (
+			<div className="container py-8">
+				<Skeleton className="w-full h-[600px]" />
+			</div>
+		);
+	}
+
+	if (!service) {
+		return <div className="container py-8">Service not found</div>;
+	}
+
+	const pyusdAmount = pyusdRate
+		? (parseEther(formatEther(service.priceUSD)) * BigInt(1e18)) / pyusdRate
+		: 0n;
 
 	return (
 		<div className="container py-8">
@@ -91,33 +107,31 @@ export default function ServiceIDMain() {
 							<div className="flex justify-between items-start">
 								<div>
 									<CardTitle className="text-2xl mb-2">
-										{mockService.name}
+										{service.name}
 									</CardTitle>
-									<CardDescription>
-										Offered by {mockService.vendor}
-									</CardDescription>
+									<CardDescription>Offered by {service.vendor}</CardDescription>
 								</div>
-								<Badge variant={mockService.isEscrow ? "default" : "secondary"}>
-									{mockService.isEscrow ? "Escrow Protected" : "Direct Payment"}
+								<Badge variant={service.isEscrow ? "default" : "secondary"}>
+									{service.isEscrow ? "Escrow Protected" : "Direct Payment"}
 								</Badge>
 							</div>
 						</CardHeader>
 						<CardContent>
 							<p className="text-muted-foreground mb-6">
-								{mockService.description}
+								{service.description}
 							</p>
 							<div className="grid grid-cols-2 md:grid-cols-3 gap-4">
 								<div className="flex items-center gap-2">
 									<Users className="h-4 w-4 text-primary" />
-									<span>{mockService.totalPurchases} purchases</span>
+									{/* <span>{transactions.length} purchases</span> */}
 								</div>
 								<div className="flex items-center gap-2">
 									<Clock className="h-4 w-4 text-primary" />
-									<span>{mockService.estimatedDelivery}</span>
+									<span>Varies</span>
 								</div>
 								<div className="flex items-center gap-2">
 									<DollarSign className="h-4 w-4 text-primary" />
-									<span>${mockService.price} USD</span>
+									<span>${formatEther(service.priceUSD)} USD</span>
 								</div>
 							</div>
 						</CardContent>
@@ -142,14 +156,14 @@ export default function ServiceIDMain() {
 									</TableRow>
 								</TableHeader>
 								<TableBody>
-									{mockTransactions.map((tx) => (
-										<TableRow key={tx.id}>
-											<TableCell>{tx.buyer}</TableCell>
-											<TableCell>${tx.amount}</TableCell>
+									{/* {transactions.map((tx) => (
+										<TableRow key={tx.id.toString()}>
+											<TableCell>{tx.client}</TableCell>
+											<TableCell>${formatEther(tx.amount)}</TableCell>
 											<TableCell>
 												<Badge
 													variant={
-														tx.status === "Completed" ? "default" : "secondary"
+														tx.status === "COMPLETED" ? "default" : "secondary"
 													}>
 													{tx.status}
 												</Badge>
@@ -158,7 +172,7 @@ export default function ServiceIDMain() {
 												{formatDistanceToNow(tx.timestamp, { addSuffix: true })}
 											</TableCell>
 										</TableRow>
-									))}
+									))} */}
 								</TableBody>
 							</Table>
 						</CardContent>
@@ -177,16 +191,16 @@ export default function ServiceIDMain() {
 								<div className="flex justify-between items-center">
 									<span>Price</span>
 									<span className="text-xl font-bold">
-										${mockService.price}
+										${formatEther(service.priceUSD)}
 									</span>
 								</div>
 								<div className="flex justify-between items-center text-sm text-muted-foreground">
 									<span>PYUSD Rate</span>
-									<span>1 PYUSD = $0.93</span>
+									<span>1 PYUSD = ${formatEther(pyusdRate ?? 0n)}</span>
 								</div>
 								<div className="flex justify-between items-center font-medium">
 									<span>Required PYUSD</span>
-									<span>{(mockService.price / 0.93).toFixed(2)} PYUSD</span>
+									<span>{formatEther(pyusdAmount)} PYUSD</span>
 								</div>
 								<ButtonConnectChecker>
 									<Button
@@ -208,19 +222,30 @@ export default function ServiceIDMain() {
 						<CardContent className="space-y-4">
 							<div className="flex justify-between items-center">
 								<span className="text-muted-foreground">Total Revenue</span>
-								<span className="font-bold">
-									${mockService.totalPurchases * mockService.price}
-								</span>
+								{/* <span className="font-bold">
+									$
+									{formatEther(
+										transactions.reduce((sum, tx) => sum + tx.amount, 0n),
+									)}
+								</span> */}
 							</div>
 							<div className="flex justify-between items-center">
 								<span className="text-muted-foreground">
 									Avg. Completion Time
 								</span>
-								<span className="font-bold">2.5 days</span>
+								<span className="font-bold">Varies</span>
 							</div>
 							<div className="flex justify-between items-center">
 								<span className="text-muted-foreground">Success Rate</span>
-								<span className="font-bold">98%</span>
+								{/* <span className="font-bold">
+									{(
+										(transactions.filter((tx) => tx.status === "COMPLETED")
+											.length /
+											transactions.length) *
+										100
+									).toFixed(2)}
+									%
+								</span> */}
 							</div>
 						</CardContent>
 					</Card>
@@ -233,8 +258,8 @@ export default function ServiceIDMain() {
 					<DialogHeader>
 						<DialogTitle>Confirm Payment</DialogTitle>
 						<DialogDescription>
-							You are about to purchase {mockService.name} for $
-							{mockService.price}
+							You are about to purchase {service.name} for $
+							{formatEther(service.priceUSD)}
 						</DialogDescription>
 					</DialogHeader>
 					<div className="space-y-4">
@@ -248,11 +273,11 @@ export default function ServiceIDMain() {
 						<div className="space-y-2">
 							<div className="flex justify-between">
 								<span>Amount in USD</span>
-								<span>${mockService.price}</span>
+								<span>${formatEther(service.priceUSD)}</span>
 							</div>
 							<div className="flex justify-between">
 								<span>Amount in PYUSD</span>
-								<span>{(mockService.price / 0.93).toFixed(2)} PYUSD</span>
+								<span>{formatEther(pyusdAmount)} PYUSD</span>
 							</div>
 						</div>
 					</div>

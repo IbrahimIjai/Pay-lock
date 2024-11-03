@@ -3,7 +3,7 @@
 import { wagmiAdapter, projectId, SUBGRAPH_URI } from "@/config";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createAppKit } from "@reown/appkit/react";
-import { base, baseSepolia } from "@reown/appkit/networks";
+import { sepolia } from "@reown/appkit/networks";
 import React, { type ReactNode } from "react";
 import { cookieToInitialState, WagmiProvider, type Config } from "wagmi";
 import { OnchainKitProvider } from "@coinbase/onchainkit";
@@ -33,8 +33,8 @@ const metadata = {
 const modal = createAppKit({
   adapters: [wagmiAdapter],
   projectId,
-  networks: [base, baseSepolia],
-  defaultNetwork: baseSepolia,
+  networks: [sepolia],
+  defaultNetwork: sepolia,
   metadata: metadata,
   features: {
     analytics: true, // Optional - defaults to your Cloud configuration
@@ -61,8 +61,7 @@ function WagmiContextProvider({
       <QueryClientProvider client={queryClient}>
         <OnchainKitProvider
           apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
-          // @ts-expect-error: type mismatch between base and OnchainKitProvider chain prop
-          chain={base}
+          chain={sepolia}
         >
           <ApolloProvider client={client}>{children}</ApolloProvider>
         </OnchainKitProvider>

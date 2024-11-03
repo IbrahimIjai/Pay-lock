@@ -1,4 +1,4 @@
-import { TOKENLOCKER, WETH } from "@/config";
+import { PayLockProtocol, WETH } from "@/config";
 import { useReadContract } from "wagmi";
 import { useEffect, useState } from "react";
 import { Address, erc20Abi, erc721Abi } from "viem";
@@ -8,10 +8,7 @@ export function bigIntToDecimal(weiValue: bigint) {
 	const etherValue = utils.formatEther(weiValue.toString());
 	return Number(etherValue);
 }
-export default function GetBalanceAllowance(
-	account: Address,
-	contract: Address,
-) {
+export default function useAllowance(account: Address, contract: Address) {
 	const [balance, setBalance] = useState(0);
 	const [allowance, setAllowance] = useState(0);
 
@@ -44,6 +41,6 @@ export function useERC721Approval(collection: Address, account: Address) {
 		address: collection,
 		abi: erc721Abi,
 		functionName: "isApprovedForAll",
-		args: [account, TOKENLOCKER],
+		args: [account, PayLockProtocol],
 	});
 }
