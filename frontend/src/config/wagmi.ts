@@ -13,8 +13,6 @@ export const networks = [sepolia];
 
 //Set up the Wagmi Adapter (Config)
 export const wagmiAdapter = new WagmiAdapter({
-	//@ts-expect-error: unknown types
-
 	storage: createStorage({
 		storage: cookieStorage,
 	}),
