@@ -2,10 +2,10 @@ import React, { ReactNode, useEffect } from "react";
 import { Address, erc20Abi } from "viem";
 import { Button } from "@/components/ui/button";
 import { P2PLENDING, WETH } from "@/config";
-import { useDistantWriteContract } from "@/hooks/wagmi/useDistantWriteContract";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAccount, useReadContract } from "wagmi";
+import { usePayLockWriteContract } from "@/hooks/wagmi/usePayLockWriteContract";
 
 export interface ApprovalERC20Props {
 	children: ReactNode;
@@ -34,7 +34,7 @@ export function ApprovalERC20({
 		isWriteContractError,
 		WriteContractError,
 		reset: resetApproval,
-	} = useDistantWriteContract({
+	} = usePayLockWriteContract({
 		fn: "approve",
 		trxTitle: "Approving ERC20 Token",
 		args: [spenderAddress, amount],

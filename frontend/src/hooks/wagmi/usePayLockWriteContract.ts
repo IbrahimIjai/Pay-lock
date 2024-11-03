@@ -3,7 +3,10 @@ import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { ToasterToast, useToast } from "../use-toast";
 import { useEffect, useRef } from "react";
 
-export type TrxTitle = "Creating new service" | "Processing payment";
+export type TrxTitle =
+	| "Creating new service"
+	| "Processing payment"
+	| "Approving ERC20 Token";
 
 export const usePayLockWriteContract = <TArgs extends readonly unknown[]>({
 	fn,
